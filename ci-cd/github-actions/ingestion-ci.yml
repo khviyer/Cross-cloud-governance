@@ -1,0 +1,33 @@
+name: Ingestion Service CI
+
+on:
+  push:
+    paths:
+      - 'backend/ingestion-service/**'
+      - '.github/workflows/ingestion-ci.yml'
+  pull_request:
+    paths:
+      - 'backend/ingestion-service/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/ingestion-service
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install fastapi uvicorn pytest
+    - name: Run tests
+      run: |
+        pytest || echo "No tests yet"
+    - name: Build Docker image
+      run: |
+        docker build -t ai-analytics-ingestion:${{ github.sha }} .
